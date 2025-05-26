@@ -22,6 +22,66 @@ body {
     box-shadow: 0 0 20px rgba(0,0,0,0.3);
   }
 
+  /* Ajuste general para formularios */
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 80%;
+  max-width: 400px;
+  margin-top: 20px;
+}
+
+/* Inputs y selects para login y registro */
+form input[type="email"],
+form input[type="password"],
+form input[type="text"],
+form select {
+  width: 100%;
+  padding: 10px;
+  font-size: 1em;
+  border: 2px solid #963c00;
+  border-radius: 5px;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Botones de los formularios */
+form button {
+  width: 100%;
+  padding: 10px;
+  font-size: 1.1em;
+  background-color: #963c00;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  margin-top: 10px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  cursor: pointer;
+}
+
+form button:hover {
+  background-color: #eba031;
+  transform: scale(1.05);
+}
+
+/* Texto de "¿No tienes cuenta?" y viceversa */
+.alt-option {
+  margin-top: 20px;
+  font-size: 0.95em;
+}
+
+.alt-option a {
+  color: #963c00;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.3s ease;
+}
+
+.alt-option a:hover {
+  color: #ba6003;
+}
+
   nav button {
   margin: 0.5em;
   padding: 10px 20px;
@@ -52,3 +112,39 @@ nav button img{
     margin-left: 5vmax;
     background-color: orange ;
 }
+
+#login-form {
+  text-align: center;
+  width: 80%;
+  max-width: 400px;
+}
+
+#login-form input[type="email"],
+#login-form input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: 2px solid #963c00;
+  border-radius: 5px;
+  font-size: 1em;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+
+#login-form button {
+  width: 100%;
+  padding: 10px;
+  font-size: 1.1em;
+  background-color: #963c00;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  margin-top: 10px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  cursor: pointer;
+}
+
+#login-form button:hover {
+  background-color: #eba031;
+  transform: scale(1.05);
+}
+

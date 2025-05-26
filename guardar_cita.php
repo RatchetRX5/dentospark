@@ -1,48 +1,67 @@
 <?php
+session_start();
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require 'vendor/autoload.php'; // Composer autoload
+require 'vendor/autoload.php';
+include 'conexion.php';
+$configs = include 'config_mail.php';
 
 // Conexión a la base de datos
-$conexion = new mysqli("localhost", "root", "", "agenda");
-
-if ($conexion->connect_error) {
-    die("Conexión fallida: " . $conexion->connect_error);
+$conn = mysqli_connect($host, $user, $pass, $db);
+if ($conn->connect_error) {
+    die("Conexión fallida: " . $conn->connect_error);
 }
 
-// Recibir datos del formulario
+// Datos del formulario
 $nombre = $_POST['nombre'];
 $aP = $_POST['aP'];
 $aM = $_POST['aM'];
 $correo = $_POST['correo'];
-$hora = $_POST['hora'];
+$hora = trim($_POST['hora']);
 $fecha = explode("-", $_POST['fecha']);
 $anio = intval($fecha[0]);
 $mes = intval($fecha[1]);
 $dia = intval($fecha[2]);
+$doctor_id = intval($_POST['doctor_id']);
 
-// Insertar en la base de datos
-$sql = "INSERT INTO citas (nombre, aP, aM, correo, hora, dia, mes, anio)
-        VALUES ('$nombre', '$aP', '$aM', '$correo', '$hora', $dia, $mes, $anio)";
+// Validar disponibilidad
+$check = $conn->prepare("SELECT id FROM citas WHERE doctor_id = ? AND dia = ? AND mes = ? AND anio = ? AND hora = ?");
+$check->bind_param("iiiss", $doctor_id, $dia, $mes, $anio, $hora);
+$check->execute();
+$check_result = $check->get_result();
 
-if ($conexion->query($sql) === TRUE) {
+if ($check_result->num_rows > 0) {
+    header("Location: agendar.php?success=2");
+    exit();
+}
 
-    // Crear instancia de PHPMailer
+// Insertar cita
+$sql = "INSERT INTO citas (nombre, aP, aM, correo, hora, dia, mes, anio, doctor_id)
+        VALUES ('$nombre', '$aP', '$aM', '$correo', '$hora', $dia, $mes, $anio, $doctor_id)";
+
+if ($conn->query($sql) === TRUE) {
+    // === Detectar proveedor en base al dominio del correo ===
+    $proveedor = 'gmail'; // por defecto
+    if (preg_match('/@(hotmail|outlook|live)\.com$/i', $correo)) {
+        $proveedor = 'outlook';
+    }
+
+    $c = $configs[$proveedor];
     $mail = new PHPMailer(true);
 
     try {
         // Configuración SMTP
         $mail->isSMTP();
-        $mail->Host       = 'smtp.gmail.com';
+        $mail->Host       = $c['host'];
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'rczjunior27@gmail.com';  // tu correo
-        $mail->Password   = 'efvy bxal bvwp mcip';               // contraseña o app password
-        $mail->SMTPSecure = 'tls';
-        $mail->Port       = 587;
+        $mail->Username   = $c['user'];
+        $mail->Password   = $c['pass'];
+        $mail->SMTPSecure = $c['secure'];
+        $mail->Port       = $c['port'];
 
         // Remitente y destinatario
-        $mail->setFrom('rczjunior27@gmail.com', 'DentoSpark');
+        $mail->setFrom($c['from_email'], $c['from_name']);
         $mail->addAddress($correo, "$nombre $aP $aM");
 
         // Contenido del correo
@@ -58,6 +77,7 @@ if ($conexion->query($sql) === TRUE) {
         header("Location: agendar.php?success=1");
         exit();
     } catch (Exception $e) {
+        error_log("Error de PHPMailer: " . $mail->ErrorInfo);
         header("Location: agendar.php?success=0");
         exit();
     }
@@ -66,5 +86,5 @@ if ($conexion->query($sql) === TRUE) {
     exit();
 }
 
-$conexion->close();
+$conn->close();
 ?>
